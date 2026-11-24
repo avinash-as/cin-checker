@@ -333,7 +333,7 @@ function validate(raw){
   if (v.includes("-") && v.length < 21){
     return validateLLPIN(v);
   }
-  if (v.length === 21){
+  if (v.length === 21 || (!v.includes("-") && v.length >= 15)){
     return validateCIN(v);
   }
   const out = blank();
