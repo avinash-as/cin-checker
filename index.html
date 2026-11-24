@@ -1,492 +1,94 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CIN Checker — FileSure</title>
-<meta name="description" content="Validate and decode Indian Corporate Identity Numbers (CIN) and LLP Identification Numbers (LLPIN).">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#f5f7fb;
-    --surface:#ffffff;
-    --surface-2:#f0f3f9;
-    --border:#e3e8f1;
-    --text:#1a2332;
-    --muted:#5b6b82;
-    --primary:#1e3a8a;
-    --primary-2:#2563eb;
-    --accent:#0ea5e9;
-    --success:#16a34a;
-    --success-bg:#ecfdf3;
-    --danger:#dc2626;
-    --danger-bg:#fef2f2;
-    --warn:#d97706;
-    --radius:14px;
-    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{
-    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-  }
-  .hero{
-    background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#2563eb 100%);
-    color:#fff;
-    padding:40px 20px 64px;
-    position:relative;
-    overflow:hidden;
-  }
-  .hero::after{
-    content:"";
-    position:absolute;inset:0;
-    background:radial-gradient(600px 300px at 80% 20%,rgba(14,165,233,.25),transparent 60%);
-    pointer-events:none;
-  }
-  .hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
-  .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-  .brand-mark{
-    width:40px;height:40px;border-radius:10px;
-    background:rgba(255,255,255,.15);
-    display:grid;place-items:center;
-    font-weight:700;font-size:18px;
-    border:1px solid rgba(255,255,255,.25);
-  }
-  .brand-name{font-weight:700;font-size:18px;letter-spacing:.2px}
-  .brand-sub{font-size:12px;opacity:.75;margin-top:-2px}
-  .hero h1{font-size:clamp(26px,4vw,40px);font-weight:700;margin:0 0 10px;letter-spacing:-.5px}
-  .hero p{font-size:clamp(14px,2vw,17px);opacity:.85;max-width:640px;margin:0}
-  .container{max-width:1200px;margin:-40px auto 40px;padding:0 20px}
-  .card{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:24px;
-    margin-bottom:20px;
-  }
-  .card-title{font-size:16px;font-weight:600;margin:0 0 4px}
-  .card-desc{font-size:13px;color:var(--muted);margin:0 0 16px}
-  .input-grid{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
-  @media (max-width:720px){.input-grid{grid-template-columns:1fr}}
-  textarea{
-    width:100%;
-    min-height:180px;
-    padding:14px 16px;
-    font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;
-    font-size:14px;
-    border:1px solid var(--border);
-    border-radius:10px;
-    background:var(--surface-2);
-    color:var(--text);
-    resize:vertical;
-    transition:border-color .15s,box-shadow .15s;
-  }
-  textarea:focus{outline:none;border-color:var(--primary-2);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
-  .toolbar{display:flex;flex-direction:column;gap:10px;min-width:160px}
-  @media (max-width:720px){.toolbar{flex-direction:row;flex-wrap:wrap}}
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    padding:10px 16px;border-radius:10px;border:1px solid var(--border);
-    background:var(--surface);color:var(--text);font-weight:600;font-size:14px;
-    cursor:pointer;transition:all .15s;white-space:nowrap;
-  }
-  .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,23,42,.08)}
-  .btn:active{transform:translateY(0)}
-  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
-  .btn.primary:hover{background:var(--primary-2)}
-  .btn.ghost{background:transparent}
-  .btn.small{padding:6px 12px;font-size:13px}
-  .examples{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .chip-example{
-    font-size:12px;padding:4px 10px;border-radius:999px;
-    background:var(--surface-2);border:1px solid var(--border);cursor:pointer;
-    color:var(--muted);
-  }
-  .chip-example:hover{color:var(--primary);border-color:var(--primary-2)}
-  .summary{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
-  .stat{
-    display:flex;align-items:center;gap:8px;
-    padding:8px 14px;border-radius:999px;
-    background:var(--surface-2);border:1px solid var(--border);
-    font-size:13px;font-weight:500;
-  }
-  .stat strong{font-weight:700}
-  .stat .dot{width:8px;height:8px;border-radius:50%}
-  .stat.valid .dot{background:var(--success)}
-  .stat.invalid .dot{background:var(--danger)}
-  .stat.llp .dot{background:var(--accent)}
-  .stat.listed .dot{background:var(--primary-2)}
-  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-  .filter-btn{
-    padding:6px 14px;border-radius:999px;border:1px solid var(--border);
-    background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);
-  }
-  .filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-  .search-box{
-    margin-left:auto;padding:6px 12px;border:1px solid var(--border);
-    border-radius:999px;font-size:13px;min-width:200px;
-  }
-  @media (max-width:720px){.search-box{margin-left:0;width:100%}}
-  .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
-  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
-  th{background:var(--surface-2);font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0}
-  tbody tr:hover{background:#f8fafc}
-  tbody tr.invalid{background:var(--danger-bg)}
-  .badge{
-    display:inline-flex;align-items:center;gap:4px;
-    padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;
-  }
-  .badge.valid{background:var(--success-bg);color:var(--success)}
-  .badge.invalid{background:var(--danger-bg);color:var(--danger)}
-  .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:12px}
-  .errors{color:var(--danger);font-size:12px}
-  .empty{
-    text-align:center;padding:48px 20px;color:var(--muted);
-  }
-  .empty h3{margin:0 0 6px;color:var(--text)}
-  .footnote{font-size:12px;color:var(--muted);margin-top:12px}
-  footer{
-    text-align:center;padding:24px 20px;color:var(--muted);font-size:12px;
-  }
-  /* mobile card layout */
-  @media (max-width:640px){
-    table,thead,tbody,th,td,tr{display:block}
-    table{min-width:0}
-    thead{display:none}
-    tbody tr{
-      border:1px solid var(--border);border-radius:10px;margin-bottom:12px;
-      padding:10px;background:var(--surface);box-shadow:var(--shadow);
-    }
-    tbody tr.invalid{background:var(--danger-bg)}
-    td{border-bottom:none;padding:4px 0;display:flex;gap:8px;align-items:flex-start}
-    td::before{content:attr(data-label);font-weight:600;color:var(--muted);min-width:96px;font-size:12px;text-transform:uppercase;letter-spacing:.3px}
-    td:first-child{display:none}
-  }
-  .hidden{display:none!important}
-  .results-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CIN Checker — FileSure</title>
+  <meta name="description" content="Validate and decode Indian Corporate Identity Numbers (CIN) and LLP Identification Numbers (LLPIN).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="hero">
-  <div class="hero-inner">
-    <div class="brand">
-      <div class="brand-mark">FS</div>
-      <div>
-        <div class="brand-name">FileSure</div>
-        <div class="brand-sub">Official records of every Indian company & LLP</div>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div>
+          <div class="brand-name">FileSure</div>
+          <div class="brand-sub">Official records of every Indian company &amp; LLP</div>
+        </div>
       </div>
+      <h1>CIN &amp; LLPIN Checker</h1>
+      <p>Paste a list of Corporate Identity Numbers or LLP Identification Numbers, one per line. We'll tell you which are valid, what kind of entity they are, and exactly what's wrong with the ones that aren't.</p>
     </div>
-    <h1>CIN &amp; LLPIN Checker</h1>
-    <p>Paste a list of Corporate Identity Numbers or LLP Identification Numbers, one per line. We'll tell you which are valid, what kind of entity they are, and exactly what's wrong with the ones that aren't.</p>
-  </div>
-</header>
+  </header>
 
-<main class="container">
-  <section class="card">
-    <h2 class="card-title">Enter numbers</h2>
-    <p class="card-desc">One per line. Up to thousands at once — everything runs in your browser, nothing is uploaded.</p>
-    <div class="input-grid">
-      <textarea id="input" placeholder="L17110MH1973PLC019786&#10;U74999DL2018PTC123456&#10;AAA-1234&#10;..."></textarea>
-      <div class="toolbar">
-        <button class="btn primary" id="checkBtn">Check numbers</button>
-        <button class="btn" id="clearBtn">Clear</button>
-        <button class="btn ghost" id="exportBtn">Download CSV</button>
+  <main class="container">
+    <section class="card">
+      <h2 class="card-title">Enter numbers</h2>
+      <p class="card-desc">One per line. Up to thousands at once — everything runs in your browser, nothing is uploaded.</p>
+      <div class="input-grid">
+        <textarea id="input" placeholder="L17110MH1973PLC019786&#10;U74999DL2018PTC123456&#10;AAA-1234&#10;..."></textarea>
+        <div class="toolbar">
+          <button class="btn primary" id="checkBtn">Check numbers</button>
+          <button class="btn" id="clearBtn">Clear</button>
+          <button class="btn ghost" id="exportBtn">Download CSV</button>
+        </div>
       </div>
-    </div>
-    <div class="examples">
-      <span style="font-size:12px;color:var(--muted);align-self:center">Try:</span>
-      <span class="chip-example" data-example="valid">Valid mix</span>
-      <span class="chip-example" data-example="invalid">Tricky inputs</span>
-      <span class="chip-example" data-example="bulk">500 lines</span>
-    </div>
-  </section>
-
-  <section class="card" id="resultsCard">
-    <div class="results-head">
-      <div>
-        <h2 class="card-title">Results</h2>
-        <p class="card-desc" id="resultsDesc">No numbers checked yet.</p>
+      <div class="examples">
+        <span style="font-size:12px;color:var(--muted);align-self:center">Try:</span>
+        <span class="chip-example" data-example="valid">Valid mix</span>
+        <span class="chip-example" data-example="invalid">Tricky inputs</span>
+        <span class="chip-example" data-example="bulk">500 lines</span>
       </div>
-    </div>
-    <div class="summary" id="summary"></div>
-    <div class="filters" id="filters">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="valid">Valid</button>
-      <button class="filter-btn" data-filter="invalid">Invalid</button>
-      <input type="search" class="search-box" id="searchBox" placeholder="Filter by text…">
-    </div>
-    <div class="table-wrap">
-      <table id="resultsTable">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Input</th>
-            <th>Entity</th>
-            <th>Status</th>
-            <th>Listed / Unlisted</th>
-            <th>State</th>
-            <th>Year</th>
-            <th>Company type</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody id="resultsBody"></tbody>
-      </table>
-    </div>
-    <div class="empty" id="emptyState">
-      <h3>Nothing to show yet</h3>
-      <p>Paste some numbers above and click <strong>Check numbers</strong>. Empty lines are ignored.</p>
-    </div>
-    <p class="footnote">Validation runs entirely in your browser. CINs are normalised to uppercase and trimmed before checking.</p>
-  </section>
-</main>
+    </section>
 
-<footer>
-  Built for FileSure · CIN &amp; LLPIN format reference: MCA India
-</footer>
+    <section class="card" id="resultsCard">
+      <div class="results-head">
+        <div>
+          <h2 class="card-title">Results</h2>
+          <p class="card-desc" id="resultsDesc">No numbers checked yet.</p>
+        </div>
+      </div>
+      <div class="summary" id="summary"></div>
+      <div class="filters hidden" id="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="valid">Valid</button>
+        <button class="filter-btn" data-filter="invalid">Invalid</button>
+        <input type="search" class="search-box" id="searchBox" placeholder="Filter by text…">
+      </div>
+      <div class="table-wrap">
+        <table id="resultsTable" class="hidden">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Input</th>
+              <th>Entity</th>
+              <th>Status</th>
+              <th>Listed / Unlisted</th>
+              <th>State</th>
+              <th>Year</th>
+              <th>Company type</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyState">
+        <h3>Nothing to show yet</h3>
+        <p>Paste some numbers above and click <strong>Check numbers</strong>. Empty lines are ignored.</p>
+      </div>
+      <p class="footnote">Validation runs entirely in your browser. CINs are normalised to uppercase and trimmed before checking.</p>
+    </section>
+  </main>
 
-<script>
-const CURRENT_YEAR = new Date().getFullYear();
+  <footer>
+    Built for FileSure · CIN &amp; LLPIN format reference: MCA India
+  </footer>
 
-const STATES = {
-  AN:"Andaman and Nicobar Islands", AP:"Andhra Pradesh", AR:"Arunachal Pradesh", AS:"Assam",
-  BR:"Bihar", CH:"Chandigarh", CG:"Chhattisgarh", DD:"Daman and Diu", DL:"Delhi",
-  DN:"Dadra and Nagar Haveli and Daman and Diu", GA:"Goa", GJ:"Gujarat", HP:"Himachal Pradesh",
-  HR:"Haryana", JH:"Jharkhand", JK:"Jammu and Kashmir", KA:"Karnataka", KL:"Kerala",
-  LA:"Ladakh", LD:"Lakshadweep", MH:"Maharashtra", ML:"Meghalaya", MN:"Manipur", MP:"Madhya Pradesh",
-  MZ:"Mizoram", NL:"Nagaland", OD:"Odisha", PB:"Punjab", PY:"Puducherry", RJ:"Rajasthan",
-  SK:"Sikkim", TN:"Tamil Nadu", TR:"Tripura", TS:"Telangana", UK:"Uttarakhand", UP:"Uttar Pradesh",
-  WB:"West Bengal"
-};
-
-const TYPES = {
-  PLC:"Public Limited Company",
-  PTC:"Private Limited Company",
-  OPC:"One Person Company",
-  NPL:"Section 8 / Not-for-profit Company",
-  FLC:"Foreign Company",
-  GOI:"Government of India Company",
-  SGC:"State Government Company",
-  ULL:"Unlimited Liability Company"
-};
-
-function blank(){ return {value:"",valid:false,errors:[],listed:"—",state:"—",year:"—",companyType:"—",entity:"Unknown"}; }
-
-function validateCIN(v){
-  const out = {value:v, valid:false, errors:[], listed:"—", state:"—", year:"—", companyType:"—", entity:"Company"};
-  if (v.length !== 21){
-    out.errors.push(`Expected 21 characters, found ${v.length}.`);
-    return out;
-  }
-  const listing = v[0];
-  const industry = v.slice(1,6);
-  const sc = v.slice(6,8);
-  const ys = v.slice(8,12);
-  const tc = v.slice(12,15);
-  const reg = v.slice(15,21);
-
-  if (listing !== "L" && listing !== "U") out.errors.push("First character must be L (listed) or U (unlisted).");
-  if (!/^\d{5}$/.test(industry)) out.errors.push("Characters 2–6 must be a 5-digit industry code.");
-  if (!/^[A-Z]{2}$/.test(sc)) out.errors.push("Characters 7–8 must be letters (state code).");
-  else if (!STATES[sc]) out.errors.push(`Unknown state code "${sc}".`);
-  if (!/^\d{4}$/.test(ys)) out.errors.push("Characters 9–12 must be a 4-digit year.");
-  else { const y=+ys; if (y < 1800 || y > CURRENT_YEAR) out.errors.push(`Year ${y} is outside the valid range (1800–${CURRENT_YEAR}).`); }
-  if (!TYPES[tc]) out.errors.push(`Unknown company type code "${tc}".`);
-  if (!/^\d{6}$/.test(reg)) out.errors.push("Characters 16–21 must be a 6-digit registration number.");
-
-  // partial fill
-  if (STATES[sc]) out.state = STATES[sc];
-  if (/^\d{4}$/.test(ys)){ const y=+ys; if (y>=1800 && y<=CURRENT_YEAR) out.year = ys; }
-  if (TYPES[tc]) out.companyType = TYPES[tc];
-  if (listing==="L"||listing==="U") out.listed = listing==="L" ? "Listed" : "Unlisted";
-
-  out.valid = out.errors.length === 0;
-  return out;
-}
-
-function validateLLPIN(v){
-  const out = {value:v, valid:false, errors:[], listed:"—", state:"—", year:"—", companyType:"—", entity:"LLP"};
-  if (!/^[A-Z]{3}-\d{4}$/.test(v)){
-    if (!v.includes("-")) out.errors.push("LLPIN must contain a hyphen (format AAA-1234).");
-    else out.errors.push("LLPIN must be 3 letters, a hyphen, and 4 digits (format AAA-1234).");
-    return out;
-  }
-  out.valid = true;
-  return out;
-}
-
-function validate(raw){
-  const v = raw.trim().toUpperCase();
-  if (v === "") return null;
-  // LLP-shaped
-  if (/^[A-Z]{3}-?\d{4}$/.test(v) && v.length <= 8){
-    return validateLLPIN(v);
-  }
-  if (v.includes("-") && v.length < 21){
-    return validateLLPIN(v);
-  }
-  if (v.length === 21 || (!v.includes("-") && v.length >= 15)){
-    return validateCIN(v);
-  }
-  const out = blank();
-  out.value = v;
-  out.errors = ["Unrecognized format. Expected a 21-character CIN or an LLPIN (AAA-1234)."];
-  return out;
-}
-
-let lastResults = [];
-let currentFilter = "all";
-
-const inputEl = document.getElementById("input");
-const checkBtn = document.getElementById("checkBtn");
-const clearBtn = document.getElementById("clearBtn");
-const exportBtn = document.getElementById("exportBtn");
-const body = document.getElementById("resultsBody");
-const emptyState = document.getElementById("emptyState");
-const table = document.getElementById("resultsTable");
-const summary = document.getElementById("summary");
-const resultsDesc = document.getElementById("resultsDesc");
-const searchBox = document.getElementById("searchBox");
-
-function runCheck(){
-  const lines = inputEl.value.split(/\r?\n/);
-  const items = [];
-  for (let i=0;i<lines.length;i++){
-    const r = validate(lines[i]);
-    if (r) { r.lineNo = i+1; items.push(r); }
-  }
-  lastResults = items;
-  render();
-}
-
-function render(){
-  body.innerHTML = "";
-  const q = searchBox.value.trim().toLowerCase();
-  let shown = 0;
-  const frag = document.createDocumentFragment();
-  lastResults.forEach((r, idx) => {
-    if (currentFilter === "valid" && !r.valid) return;
-    if (currentFilter === "invalid" && r.valid) return;
-    if (q && !r.value.toLowerCase().includes(q) && !r.errors.join(" ").toLowerCase().includes(q) && !r.state.toLowerCase().includes(q)) return;
-    shown++;
-    const tr = document.createElement("tr");
-    if (!r.valid) tr.classList.add("invalid");
-    const cells = [
-      ["#", r.lineNo],
-      ["Input", r.value],
-      ["Entity", r.entity],
-      ["Status", r.valid ? "Valid" : "Invalid"],
-      ["Listed / Unlisted", r.listed],
-      ["State", r.state],
-      ["Year", r.year],
-      ["Company type", r.companyType],
-      ["Notes", r.errors.length ? r.errors.join(" ") : "—"]
-    ];
-    cells.forEach(([label, val], i) => {
-      const td = document.createElement("td");
-      td.setAttribute("data-label", label);
-      if (i === 0) { td.textContent = val; return; }
-      if (label === "Input"){ td.innerHTML = `<span class="mono">${escapeHtml(val)}</span>`; return; }
-      if (label === "Status"){
-        td.innerHTML = `<span class="badge ${r.valid?'valid':'invalid'}">${r.valid?'✓ Valid':'✗ Invalid'}</span>`;
-        return;
-      }
-      if (label === "Notes" && r.errors.length){
-        td.innerHTML = `<span class="errors">${escapeHtml(val)}</span>`;
-        return;
-      }
-      td.textContent = val;
-    });
-    frag.appendChild(tr);
-  });
-  body.appendChild(frag);
-
-  const hasResults = lastResults.length > 0;
-  emptyState.classList.toggle("hidden", hasResults);
-  table.classList.toggle("hidden", !hasResults);
-  document.getElementById("filters").classList.toggle("hidden", !hasResults);
-
-  // summary
-  summary.innerHTML = "";
-  if (hasResults){
-    const valid = lastResults.filter(r=>r.valid).length;
-    const invalid = lastResults.length - valid;
-    const llp = lastResults.filter(r=>r.entity==="LLP").length;
-    const companies = lastResults.filter(r=>r.entity==="Company").length;
-    const listed = lastResults.filter(r=>r.listed==="Listed").length;
-    const unlisted = lastResults.filter(r=>r.listed==="Unlisted").length;
-    const items = [
-      {label:"Total", value:lastResults.length, cls:""},
-      {label:"Valid", value:valid, cls:"valid"},
-      {label:"Invalid", value:invalid, cls:"invalid"},
-      {label:"Companies", value:companies, cls:""},
-      {label:"LLPs", value:llp, cls:"llp"},
-      {label:"Listed", value:listed, cls:"listed"},
-      {label:"Unlisted", value:unlisted, cls:""},
-    ];
-    items.forEach(it=>{
-      const div = document.createElement("div");
-      div.className = "stat " + it.cls;
-      div.innerHTML = `<span class="dot"></span><span>${it.label}</span><strong>${it.value}</strong>`;
-      summary.appendChild(div);
-    });
-  }
-
-  resultsDesc.textContent = hasResults
-    ? `${lastResults.length} number${lastResults.length===1?'':'s'} checked · showing ${shown}.`
-    : "No numbers checked yet.";
-}
-
-function escapeHtml(s){
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-checkBtn.addEventListener("click", runCheck);
-clearBtn.addEventListener("click", () => { inputEl.value=""; lastResults=[]; render(); });
-exportBtn.addEventListener("click", () => {
-  if (!lastResults.length) return;
-  const headers = ["#","Input","Entity","Status","Listed/Unlisted","State","Year","Company type","Notes"];
-  const rows = lastResults.map((r,i)=>[i+1,r.value,r.entity,r.valid?"Valid":"Invalid",r.listed,r.state,r.year,r.companyType,r.errors.join("; ")]);
-  const csv = [headers,...rows].map(row=>row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv],{type:"text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href=url; a.download="cin-check-results.csv"; a.click();
-  URL.revokeObjectURL(url);
-});
-
-document.querySelectorAll(".filter-btn").forEach(b=>{
-  b.addEventListener("click", ()=>{
-    document.querySelectorAll(".filter-btn").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    currentFilter = b.dataset.filter;
-    render();
-  });
-});
-searchBox.addEventListener("input", render);
-
-// examples
-const examples = {
-  valid: "L17110MH1973PLC019786\nU74999DL2018PTC123456\nAAA-1234\nL01100KA2020OPC123456\nU62090TN2019PTC098765",
-  invalid: "L17110MH1973PLC01978\nXX12345\nL17110MH1973PLC019786\nL17110XX1973PLC019786\nL17110MH9999PLC019786\nL17110MH1973XYZ019786\nL17110MH1973PLC01978A\nAAA1234\nAAA-12",
-  bulk: Array.from({length:500},(_,i)=> (i%2===0?`L${String(10000+i).slice(0,5)}MH20${String(10+(i%10)).padStart(2,'0')}PLC${String(100000+i).slice(0,6)}`:`AAA-${String(1000+i).slice(-4)}`)).join("\n")
-};
-document.querySelectorAll(".chip-example").forEach(c=>{
-  c.addEventListener("click", ()=>{
-    inputEl.value = examples[c.dataset.example];
-    runCheck();
-  });
-});
-
-// initial
-render();
-</script>
+  <script src="app.js"></script>
 </body>
 </html>
