@@ -420,13 +420,14 @@ function render(){
     const valid = lastResults.filter(r=>r.valid).length;
     const invalid = lastResults.length - valid;
     const llp = lastResults.filter(r=>r.entity==="LLP").length;
+    const companies = lastResults.filter(r=>r.entity==="Company").length;
     const listed = lastResults.filter(r=>r.listed==="Listed").length;
     const unlisted = lastResults.filter(r=>r.listed==="Unlisted").length;
     const items = [
       {label:"Total", value:lastResults.length, cls:""},
       {label:"Valid", value:valid, cls:"valid"},
       {label:"Invalid", value:invalid, cls:"invalid"},
-      {label:"Companies", value:lastResults.length-llp, cls:""},
+      {label:"Companies", value:companies, cls:""},
       {label:"LLPs", value:llp, cls:"llp"},
       {label:"Listed", value:listed, cls:"listed"},
       {label:"Unlisted", value:unlisted, cls:""},
